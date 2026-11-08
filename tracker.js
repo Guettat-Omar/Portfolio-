@@ -4,7 +4,8 @@
    is IF they are identifiable (personal ?r= link, or they typed their name). */
 (function () {
   const C = window.SITE_CONFIG || {};
-  const enabled = C.supabaseUrl && !C.supabaseUrl.includes("YOUR-PROJECT");
+  const enabled = !!(C.supabaseUrl && C.supabaseAnonKey) &&
+    !C.supabaseUrl.includes("YOUR-PROJECT") && !C.supabaseAnonKey.includes("XXXX");
   const store = {
     get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
     set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
@@ -62,15 +63,17 @@
       meta: extra || null
     };
     if (!enabled || dnt) { console.debug("[track]", row); return; }
+    const headers = {
+      "Content-Type": "application/json",
+      apikey: C.supabaseAnonKey,
+      Prefer: "return=minimal"
+    };
+    // Legacy anon keys ("eyJ…") also go in Authorization; new publishable keys must not.
+    if (/^eyJ/.test(C.supabaseAnonKey)) headers.Authorization = "Bearer " + C.supabaseAnonKey;
     fetch(C.supabaseUrl + "/rest/v1/events", {
       method: "POST",
       keepalive: true,                       // survives tab close
-      headers: {
-        "Content-Type": "application/json",
-        apikey: C.supabaseAnonKey,
-        Authorization: "Bearer " + C.supabaseAnonKey,
-        Prefer: "return=minimal"
-      },
+      headers,
       body: JSON.stringify(row)
     }).catch(() => {});
   }
