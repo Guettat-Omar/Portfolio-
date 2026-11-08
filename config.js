@@ -9,6 +9,6 @@ window.SITE_CONFIG = {
 
   // Supabase project (Settings → API). The anon key is meant to be public;
   // the SQL policies in supabase/schema.sql make it INSERT-only.
-  supabaseUrl:     "https://YOUR-PROJECT.supabase.co",           // ← replace
-  supabaseAnonKey: "YOUR-ANON-KEY"                               // ← replace
+  supabaseUrl:     "https://npluxlsfayczmbijkdhf.supabase.co",           // ← replace
+  supabaseAnonKey: "sb_publishable_fnKDDXFQPhHWmvNvd7RZdA_co7S4T5E"                               // ← replace
 };
