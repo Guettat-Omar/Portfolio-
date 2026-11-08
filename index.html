@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Omar Guettat — Embedded Software Engineer</title>
+<meta name="description" content="Omar Guettat — Embedded Software Engineer. Firmware, CAN / LIN / SOME-IP, Embedded Linux, IoT. Sfax, Tunisia — open to relocation.">
+<meta name="theme-color" content="#0a0c0f">
+<meta property="og:title" content="Omar Guettat — Embedded Software Engineer">
+<meta property="og:description" content="Firmware, automotive buses (CAN, LIN, SOME/IP), Embedded Linux and IoT.">
+<meta property="og:image" content="assets/omar.webp">
+<link rel="icon" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<script src="tracker.js"></script>
+<style>
+:root{
+  --bg:#0a0c0f; --bg2:#0f1216; --panel:#12161b; --line:#1f252d; --line2:#2a323c;
+  --ink:#e9edf1; --mute:#8a96a3; --dim:#5b6672;
+  --sig:#5ef2c2;          /* CAN_H trace */
+  --sig2:#ffb547;         /* CAN_L / warning amber */
+  --sigsoft:rgba(94,242,194,.12);
+  --serif:"Instrument Serif",Georgia,serif;
+  --sans:"Inter Tight",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+::selection{background:var(--sig);color:#000}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+.mono{font-family:var(--mono)}
+/* subtle PCB grid */
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:64px 64px;opacity:.28;mask-image:radial-gradient(ellipse at 50% 0%,#000 0%,transparent 70%)}
+main,header,footer{position:relative;z-index:1}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:50;transition:.3s;border-bottom:1px solid transparent}
+nav.scrolled{background:rgba(10,12,15,.78);backdrop-filter:blur(14px);border-color:var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:68px}
+.logo{font-family:var(--mono);font-size:14px;letter-spacing:.04em;display:flex;align-items:center;gap:10px}
+.logo b{display:inline-grid;place-items:center;width:30px;height:30px;border:1px solid var(--sig);color:var(--sig);border-radius:6px;font-weight:500}
+.navlinks{display:flex;gap:28px;font-size:14px;color:var(--mute)}
+.navlinks a:hover{color:var(--ink)}
+.btn{background:transparent;color:inherit;cursor:pointer;font-family:var(--sans);display:inline-flex;align-items:center;gap:9px;padding:12px 20px;border-radius:999px;font-weight:600;font-size:14.5px;transition:.2s;border:1px solid var(--line2);white-space:nowrap}
+.btn svg{width:16px;height:16px}
+.btn.primary{background:var(--sig);color:#04110c;border-color:var(--sig)}
+.btn.primary:hover{box-shadow:0 0 0 6px var(--sigsoft);transform:translateY(-1px)}
+.btn.ghost:hover{border-color:var(--ink)}
+.btn.sm{padding:9px 16px;font-size:13.5px}
+@media(max-width:860px){.navlinks{display:none}}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;padding:110px 0 60px}
+.hero .wrap{display:grid;grid-template-columns:1.25fr .85fr;gap:56px;align-items:center}
+.status{display:inline-flex;align-items:center;gap:10px;font:500 12.5px var(--mono);color:var(--sig);border:1px solid rgba(94,242,194,.3);padding:7px 14px;border-radius:999px;background:var(--sigsoft)}
+.status i{width:7px;height:7px;border-radius:50%;background:var(--sig);box-shadow:0 0 10px var(--sig);animation:blink 1.6s infinite}
+@keyframes blink{50%{opacity:.25}}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(54px,8.4vw,112px);line-height:.92;letter-spacing:-.02em;margin:26px 0 22px}
+h1 em{color:var(--sig);font-style:italic}
+.lede{font-size:clamp(17px,1.6vw,20px);color:var(--mute);max-width:560px}
+.lede strong{color:var(--ink);font-weight:500}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px}
+.meta-row{display:flex;flex-wrap:wrap;gap:22px;margin-top:38px;font:13px var(--mono);color:var(--dim)}
+.meta-row span{display:flex;gap:8px;align-items:center}
+.meta-row span::before{content:"";width:5px;height:5px;background:var(--sig2);border-radius:1px}
+
+.portrait{position:relative;aspect-ratio:4/5;border-radius:22px;overflow:hidden;border:1px solid var(--line2);background:#0d0f12}
+.portrait img{width:100%;height:100%;object-fit:cover;object-position:50% 15%;filter:saturate(.92) contrast(1.04)}
+.portrait::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(10,12,15,.95))}
+.scope{position:absolute;left:14px;right:14px;bottom:14px;z-index:2;border:1px solid var(--line2);border-radius:12px;background:rgba(10,12,15,.82);backdrop-filter:blur(8px);padding:12px 14px}
+.scope-h{display:flex;justify-content:space-between;font:11px var(--mono);color:var(--dim);margin-bottom:6px}
+.scope-h b{color:var(--sig);font-weight:500}
+.scope svg{width:100%;height:46px;display:block}
+.trace{fill:none;stroke-width:1.6}
+.frames{font:11.5px/1.55 var(--mono);color:var(--mute);height:52px;overflow:hidden;margin-top:6px}
+.frames div{white-space:nowrap;animation:slide .4s ease}
+.frames .id{color:var(--sig2)} .frames .ok{color:var(--sig)}
+@keyframes slide{from{opacity:0;transform:translateY(6px)}}
+@media(max-width:900px){.hero .wrap{grid-template-columns:1fr}.portrait{max-width:420px}}
+
+/* SECTIONS */
+section{padding:110px 0}
+.kicker{font:500 12.5px var(--mono);color:var(--sig);letter-spacing:.12em;text-transform:uppercase;display:flex;align-items:center;gap:12px}
+.kicker::before{content:"";width:28px;height:1px;background:var(--sig)}
+h2{font-family:var(--serif);font-weight:400;font-size:clamp(38px,5vw,64px);line-height:1;letter-spacing:-.015em;margin:18px 0 18px}
+h2 em{font-style:italic;color:var(--mute)}
+.sub{color:var(--mute);max-width:640px;font-size:17px}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-top:54px;background:var(--bg2)}
+.stat{padding:30px 26px;border-right:1px solid var(--line)}
+.stat:last-child{border:0}
+.stat b{display:block;font-family:var(--serif);font-weight:400;font-size:54px;line-height:1;color:var(--ink)}
+.stat b sup{font-size:.45em;color:var(--sig);vertical-align:top;margin-left:2px}
+.stat>span{font-size:13.5px;color:var(--mute);display:block;margin-top:10px}
+@media(max-width:760px){.stats{grid-template-columns:1fr 1fr}.stat:nth-child(2){border-right:0}.stat:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+
+/* FEATURED */
+.feature{margin-top:56px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(180deg,var(--panel),var(--bg2));overflow:hidden}
+.feature-top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:18px;padding:34px 36px 0}
+.feature h3{font-family:var(--serif);font-weight:400;font-size:36px;line-height:1.05}
+.tagline{font:12.5px var(--mono);color:var(--dim);margin-top:8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:12px var(--mono);padding:6px 11px;border-radius:7px;border:1px solid var(--line2);color:var(--mute);background:rgba(255,255,255,.015)}
+.chip.on{color:var(--sig);border-color:rgba(94,242,194,.35)}
+.arch{padding:28px 36px 10px}
+.arch{overflow-x:auto}.arch svg{width:100%;min-width:760px;height:auto;display:block}
+.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
+.fcell{padding:26px 30px;border-right:1px solid var(--line)}
+.fcell:last-child{border:0}
+.fcell h4{font:500 12px var(--mono);color:var(--sig2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+.fcell p{font-size:14.5px;color:var(--mute)}
+.fcell p b{color:var(--ink);font-weight:500}
+@media(max-width:860px){.feature-grid{grid-template-columns:1fr}.fcell{border-right:0;border-bottom:1px solid var(--line)}.feature-top,.arch{padding-left:22px;padding-right:22px}}
+.node{fill:#0d1014;stroke:var(--line2)}
+.node-t{font:600 12px var(--sans);fill:var(--ink)}
+.node-s{font:10.5px var(--mono);fill:var(--dim)}
+.bus-l{font:500 11px var(--mono)}
+.pulse{stroke-dasharray:6 10;animation:flow 1.2s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-32}}
+
+/* TIMELINE */
+.tl{margin-top:50px;border-left:1px solid var(--line2);padding-left:34px;display:grid;gap:44px}
+.tl-item{position:relative}
+.tl-item::before{content:"";position:absolute;left:-40px;top:8px;width:11px;height:11px;border-radius:3px;background:var(--bg);border:1.5px solid var(--sig);transform:rotate(45deg)}
+.tl-date{font:12.5px var(--mono);color:var(--dim)}
+.tl-item h3{font-size:22px;font-weight:600;margin:6px 0 2px}
+.tl-co{color:var(--sig);font-size:15px}
+.tl-item ul{margin-top:14px;list-style:none;display:grid;gap:9px;max-width:780px}
+.tl-item li{color:var(--mute);padding-left:22px;position:relative;font-size:15.5px}
+.tl-item li::before{content:"›";position:absolute;left:4px;color:var(--sig2);font-family:var(--mono)}
+
+/* PROJECTS */
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;margin-top:50px}
+.card{border:1px solid var(--line);border-radius:18px;padding:28px;background:var(--bg2);transition:.25s;display:flex;flex-direction:column;gap:14px}
+.card:hover{border-color:var(--line2);transform:translateY(-3px);background:var(--panel)}
+.card .n{font:12px var(--mono);color:var(--dim)}
+.card h3{font-size:20px;font-weight:600;line-height:1.25}
+.card p{color:var(--mute);font-size:14.5px;flex:1}
+
+/* SKILLS */
+.skills{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-top:50px}
+.sk{background:var(--bg2);padding:28px}
+@media(max-width:900px){.skills{grid-template-columns:1fr 1fr}}@media(max-width:560px){.skills{grid-template-columns:1fr}}
+.sk h4{font:500 12px var(--mono);color:var(--sig);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px}
+.sk .chips{gap:7px}
+
+/* LEAD */
+.lead{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:50px}
+@media(max-width:760px){.lead{grid-template-columns:1fr}}
+
+/* CONTACT */
+.contact{border:1px solid var(--line);border-radius:26px;padding:clamp(34px,6vw,72px);background:radial-gradient(ellipse at 100% 0%,rgba(94,242,194,.10),transparent 55%),var(--bg2);text-align:left}
+.contact h2{font-size:clamp(42px,6.5vw,86px)}
+.contact .cta{margin-top:30px}
+footer{padding:40px 0 50px;color:var(--dim);font-size:13px}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;border-top:1px solid var(--line);padding-top:26px}
+
+/* REVEAL */
+.js .rv{opacity:0;transform:translateY(22px);transition:opacity .8s ease,transform .8s ease}
+.js .rv.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.js .rv{opacity:1;transform:none}.pulse,.status i{animation:none}}
+
+/* TOAST (optional identify) */
+.toast{visibility:hidden;position:fixed;right:22px;bottom:22px;z-index:80;width:min(360px,calc(100vw - 32px));background:var(--panel);border:1px solid var(--line2);border-radius:16px;padding:20px;box-shadow:0 30px 80px rgba(0,0,0,.5);transform:translateY(140%);transition:.45s cubic-bezier(.2,.8,.2,1)}
+.toast.show{transform:none;visibility:visible}
+.toast h5{font-size:16px;font-weight:600;margin-bottom:4px}
+.toast p{font-size:13.5px;color:var(--mute);margin-bottom:14px}
+.toast input{width:100%;background:var(--bg);border:1px solid var(--line2);border-radius:9px;padding:10px 12px;color:var(--ink);font:14px var(--sans);margin-bottom:8px}
+.toast input:focus{outline:none;border-color:var(--sig)}
+.toast .row{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
+.toast .x{position:absolute;top:10px;right:12px;color:var(--dim);background:none;border:0;font-size:20px;cursor:pointer}
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.add("js");setTimeout(function(){document.querySelectorAll(".rv").forEach(function(e){e.classList.add("in")})},2500);</script>
+
+<nav id="nav">
+  <div class="wrap">
+    <a href="#top" class="logo"><b>OG</b> omar.guettat</a>
+    <div class="navlinks">
+      <a href="#about">About</a><a href="#work">Flagship</a><a href="#experience">Experience</a><a href="#projects">Projects</a><a href="#contact">Contact</a>
+    </div>
+    <a class="btn primary sm js-cv" data-track="cv_download_nav" download>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 21h16"/></svg>CV
+    </a>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div>
+      <span class="status"><i></i>Open to embedded roles · relocation OK</span>
+      <h1>Omar<br>Guettat<em>.</em></h1>
+      <p class="lede">Embedded Software Engineer. I write <strong>firmware that talks on real buses</strong> — CAN, LIN, SOME/IP — from register-level drivers up to validated system behaviour, on a V-model.</p>
+      <div class="cta">
+        <a class="btn primary js-cv" data-track="cv_download_hero" download>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 21h16"/></svg>Download CV
+        </a>
+        <a class="btn ghost js-linkedin" data-track="linkedin_hero" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 11-.02 5 2.5 2.5 0 01.02-5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05C20.6 8.65 21 11.2 21 14.5V21h-4v-5.8c0-1.4-.03-3.2-1.95-3.2-1.95 0-2.25 1.5-2.25 3.1V21H9z"/></svg>LinkedIn
+        </a>
+        <a class="btn ghost js-mail" data-track="email_hero">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>Email
+        </a>
+      </div>
+      <div class="meta-row"><span>Sfax, Tunisia</span><span>ENET'Com · 2026</span><span>EN · FR · AR</span></div>
+    </div>
+
+    <div class="portrait rv">
+      <img src="assets/omar.webp" alt="Portrait of Omar Guettat" width="900" height="1125">
+      <div class="scope">
+        <div class="scope-h"><span>CH1 CAN_H / CH2 CAN_L · 500 kbit/s</span><b>● LIVE</b></div>
+        <svg viewBox="0 0 300 46" preserveAspectRatio="none" aria-hidden="true">
+          <path id="th" class="trace" stroke="var(--sig)"/>
+          <path id="tl" class="trace" stroke="var(--sig2)" opacity=".8"/>
+        </svg>
+        <div class="frames" id="frames"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+<section id="about">
+  <div class="wrap">
+    <div class="kicker rv">About</div>
+    <h2 class="rv">From the register<br><em>to the requirement.</em></h2>
+    <p class="sub rv">Industrial Computer Engineering graduate (ENET'Com, 2026). My final-year project at KPIT was a distributed automotive platform built the way the industry builds it: requirements first, layered software, then documented test cases including boundary and negative tests. I also debug where the bugs actually live — logic analyzer on the bus, termios on the Linux side.</p>
+    <div class="stats rv">
+      <div class="stat"><b data-count="5">0</b><span>ECU nodes on one distributed platform</span></div>
+      <div class="stat"><b data-count="3">0</b><span>vehicle networks: CAN, LIN, SOME/IP</span></div>
+      <div class="stat"><b data-count="5">0</b><span>ECU fault scenarios automated by injection</span></div>
+      <div class="stat"><b><span data-count="50">0</span><sup>+</sup></b><span>workshops organised as IEEE lead</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="work">
+  <div class="wrap">
+    <div class="kicker rv">Flagship project · KPIT</div>
+    <h2 class="rv">A 5-node vehicle network,<br><em>built and validated end to end.</em></h2>
+    <div class="feature rv">
+      <div class="feature-top">
+        <div>
+          <h3>Distributed Automotive Didactic Platform</h3>
+          <div class="tagline">FINAL-YEAR PROJECT · 02/2026 – 06/2026 · RASPBERRY PI + ARDUINO</div>
+        </div>
+        <div class="chips">
+          <span class="chip on">CAN · ISO 11898</span><span class="chip on">LIN 2.0</span><span class="chip on">SOME/IP + SD</span><span class="chip">CRC-8 SAE J1850</span><span class="chip">V-model</span>
+        </div>
+      </div>
+      <div class="arch">
+        <svg viewBox="0 0 1000 300" role="img" aria-label="Architecture: five nodes connected over CAN at 500 kbit/s, LIN at 19.2 kbit/s and Ethernet SOME/IP, each node running a four-layer software stack">
+          <!-- layered stack -->
+          <g transform="translate(0,20)">
+            <text x="0" y="0" class="node-s">SOFTWARE STACK · EVERY NODE</text>
+            <g font-family="JetBrains Mono, ui-monospace, monospace" font-size="12">
+              <rect x="0" y="14" width="210" height="44" rx="8" fill="rgba(94,242,194,.10)" stroke="rgba(94,242,194,.45)"/><text x="16" y="41" fill="#5ef2c2">Application</text>
+              <rect x="0" y="66" width="210" height="44" rx="8" fill="#0d1014" stroke="#2a323c"/><text x="16" y="93" fill="#e9edf1">Service</text>
+              <rect x="0" y="118" width="210" height="44" rx="8" fill="#0d1014" stroke="#2a323c"/><text x="16" y="145" fill="#e9edf1">Driver</text>
+              <rect x="0" y="170" width="210" height="44" rx="8" fill="rgba(255,181,71,.08)" stroke="rgba(255,181,71,.45)"/><text x="16" y="197" fill="#ffb547">HAL · registers</text>
+            </g>
+            <path d="M228 120 h40" stroke="#2a323c" stroke-width="1.5" marker-end="url(#ar)"/>
+          </g>
+          <defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5b6672"/></marker></defs>
+          <!-- buses -->
+          <g>
+            <line x1="300" y1="70" x2="990" y2="70" stroke="#5ef2c2" stroke-width="2"/>
+            <line x1="300" y1="70" x2="990" y2="70" stroke="#04110c" stroke-width="2" class="pulse"/>
+            <text x="300" y="58" class="bus-l" fill="#5ef2c2">CAN · 500 kbit/s · CRC-8</text>
+            <line x1="300" y1="250" x2="990" y2="250" stroke="#ffb547" stroke-width="2"/>
+            <line x1="300" y1="250" x2="990" y2="250" stroke="#0a0c0f" stroke-width="2" class="pulse"/>
+            <text x="300" y="282" class="bus-l" fill="#ffb547">LIN 2.0 · 19.2 kbit/s · master scheduler</text>
+          </g>
+          <!-- nodes -->
+          <g id="nodes"></g>
+        </svg>
+      </div>
+      <div class="feature-grid">
+        <div class="fcell"><h4>Low level</h4><p>LIN master scheduler on <b>bare UART registers</b>. Fixed a Linux serial-driver edge case — <b>false LIN BREAK detection</b> — through termios.</p></div>
+        <div class="fcell"><h4>Protocols</h4><p>Custom <b>CRC-8 (SAE J1850)</b> integrity on CAN frames. <b>SOME/IP</b> service with Service Discovery, bridged to a WebSocket dashboard.</p></div>
+        <div class="fcell"><h4>Validation</h4><p>Requirements → specs → <b>10 documented test cases</b> incl. boundary/negative, all passed. Fault-injection dashboard driving <b>5 ECU failure scenarios</b>.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="experience">
+  <div class="wrap">
+    <div class="kicker rv">Experience</div>
+    <h2 class="rv">Where I've <em>shipped.</em></h2>
+    <div class="tl">
+      <div class="tl-item rv">
+        <div class="tl-date">02/2026 — 06/2026 · Sfax</div>
+        <h3>Embedded Systems Engineer Intern (PFE)</h3>
+        <div class="tl-co">KPIT</div>
+        <ul>
+          <li>Designed a 5-node distributed system with a 4-layer architecture (Application, Service, Driver, HAL) over CAN and LIN.</li>
+          <li>Diagnosed bus-level faults with a logic analyzer and UART diagnostics.</li>
+          <li>Reverse-engineered two undocumented automotive components with only a multimeter; designed a voltage divider to interface one panel to an Arduino ADC.</li>
+        </ul>
+      </div>
+      <div class="tl-item rv">
+        <div class="tl-date">07/2025 — 08/2025 · Megrine</div>
+        <h3>Local RAG-based Chatbot</h3>
+        <div class="tl-co">Sagemcom</div>
+        <ul>
+          <li>Built a fully local retrieval chatbot (LangChain, FAISS, BM25, Sentence Transformers) with a FastAPI backend and React frontend for the Quality &amp; Environment department.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="projects">
+  <div class="wrap">
+    <div class="kicker rv">More projects</div>
+    <h2 class="rv">Sensors, signals, <em>systems.</em></h2>
+    <div class="grid3">
+      <article class="card rv">
+        <span class="n">01 · IoT · 10/2025 – 12/2025</span>
+        <h3>Industrial Gas Monitoring &amp; Smart HVAC</h3>
+        <p>ESP32 firmware reading 4 sensors / 6 parameters (CO, CO₂, PM10, PM2.5, temp, humidity), published over MQTT, built for tight RAM/flash. HVAC kicks in on WHO / OSHA / NIOSH exposure thresholds; Python backend stores data and predicts risk.</p>
+        <div class="chips"><span class="chip">ESP32</span><span class="chip">MQTT</span><span class="chip">C++</span><span class="chip">Python</span></div>
+      </article>
+      <article class="card rv">
+        <span class="n">02 · Embedded Linux · 10/2024 – 03/2025</span>
+        <h3>Predictive Maintenance on Raspberry Pi</h3>
+        <p>Signal-processing pipeline on a Raspberry Pi for preventive maintenance of production equipment, with a React / Node.js interface for remote performance monitoring.</p>
+        <div class="chips"><span class="chip">Raspberry Pi</span><span class="chip">DSP</span><span class="chip">Node.js</span><span class="chip">React</span></div>
+      </article>
+      <article class="card rv">
+        <span class="n">03 · AI · 07/2025 – 08/2025</span>
+        <h3>Offline RAG Assistant</h3>
+        <p>Hybrid dense + BM25 retrieval running entirely on-premise, so internal quality documents never leave the company network.</p>
+        <div class="chips"><span class="chip">LangChain</span><span class="chip">FAISS</span><span class="chip">FastAPI</span></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="skills">
+  <div class="wrap">
+    <div class="kicker rv">Toolbox</div>
+    <h2 class="rv">What I <em>work with.</em></h2>
+    <div class="skills rv">
+      <div class="sk"><h4>Firmware</h4><div class="chips"><span class="chip on">Embedded C</span><span class="chip on">C++</span><span class="chip">Bare-metal</span><span class="chip">RTOS</span><span class="chip">HAL / drivers</span><span class="chip">Register-level config</span></div></div>
+      <div class="sk"><h4>Buses &amp; protocols</h4><div class="chips"><span class="chip on">CAN</span><span class="chip on">LIN 2.0</span><span class="chip on">SOME/IP</span><span class="chip">I2C</span><span class="chip">SPI</span><span class="chip">UART</span><span class="chip">Modbus</span><span class="chip">MQTT</span></div></div>
+      <div class="sk"><h4>Embedded Linux</h4><div class="chips"><span class="chip on">SocketCAN</span><span class="chip">Device-tree overlays</span><span class="chip">systemd</span><span class="chip">termios</span><span class="chip">Shell</span></div></div>
+      <div class="sk"><h4>Test &amp; validation</h4><div class="chips"><span class="chip on">V-model</span><span class="chip">ISTQB principles</span><span class="chip">Test-case design</span><span class="chip">Logic analyzer</span><span class="chip">Fault injection</span></div></div>
+      <div class="sk"><h4>Hardware</h4><div class="chips"><span class="chip">ESP32</span><span class="chip">Raspberry Pi</span><span class="chip">Arduino</span><span class="chip">Multimeter RE</span></div></div>
+      <div class="sk"><h4>Tooling</h4><div class="chips"><span class="chip">Git</span><span class="chip">PlatformIO</span><span class="chip">CMake</span><span class="chip">Python</span><span class="chip">MATLAB / Simulink</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="leadership">
+  <div class="wrap">
+    <div class="kicker rv">Beyond code</div>
+    <h2 class="rv">I teach what <em>I build.</em></h2>
+    <div class="lead">
+      <article class="card rv"><span class="n">02/2024 – 02/2025</span><h3>Chair · IAS ENET'Com Student Branch Chapter</h3><p>Led the team behind technical and non-technical events. Designed and delivered two multi-session IoT bootcamps.</p></article>
+      <article class="card rv"><span class="n">02/2025 – 02/2026</span><h3>Treasurer · IEEE ENET'Com Student Branch</h3><p>Owned the branch budget and led sponsorship negotiations. 50+ workshops and activities across both roles.</p></article>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="wrap">
+    <div class="contact rv">
+      <div class="kicker">Contact</div>
+      <h2>Hiring for firmware,<br><em>automotive or IIoT?</em></h2>
+      <p class="sub">Available now for full-time roles in Tunisia, Europe or the Gulf. The fastest reply is by email.</p>
+      <div class="cta">
+        <a class="btn primary js-mail" data-track="email_contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span class="js-mail-text">Email</span></a>
+        <a class="btn ghost js-cv" data-track="cv_download_contact" download>Download CV</a>
+        <a class="btn ghost js-linkedin" data-track="linkedin_contact" target="_blank" rel="noopener">LinkedIn</a>
+        <a class="btn ghost js-github" data-track="github_contact" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Omar Guettat</span>
+    <span>This site measures visits (time on page, clicked links) to improve it. No ad trackers, no cookies.</span>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="dialog" aria-labelledby="toast-h">
+  <button class="x" aria-label="Close" id="toastX">×</button>
+  <h5 id="toast-h">CV downloading ✓</h5>
+  <p>Optional — tell me who you are and I'll make sure to follow up.</p>
+  <input id="tName" placeholder="Your name" autocomplete="name">
+  <input id="tCo" placeholder="Company" autocomplete="organization">
+  <div class="row"><button class="btn ghost sm" id="toastSkip">No thanks</button><button class="btn primary sm" id="toastSend">Send</button></div>
+</div>
+
+<script>
+const C = Object.assign({linkedin:"#",github:"",email:"omarguettat14@gmail.com",cv:"assets/Omar_Guettat_CV.pdf"}, window.SITE_CONFIG || {});
+window.SITE_CONFIG = C;
+// wire links from config
+document.querySelectorAll(".js-cv").forEach(a => { a.href = C.cv; a.setAttribute("download","Omar_Guettat_CV.pdf"); });
+document.querySelectorAll(".js-linkedin").forEach(a => a.href = C.linkedin);
+document.querySelectorAll(".js-mail").forEach(a => a.href = "mailto:" + C.email + "?subject=" + encodeURIComponent("Opportunity — embedded role"));
+document.querySelectorAll(".js-mail-text").forEach(s => s.textContent = C.email);
+document.querySelectorAll(".js-github").forEach(a => { if (C.github && !C.github.includes("YOUR-")) a.href = C.github; else a.remove(); });
+
+// nav state
+const nav = document.getElementById("nav");
+addEventListener("scroll", () => nav.classList.toggle("scrolled", scrollY > 30), { passive:true });
+
+// reveal + counters
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  e.target.classList.add("in");
+  e.target.querySelectorAll("[data-count]").forEach(el => {
+    const end = +el.dataset.count, t0 = performance.now();
+    const step = t => { const p = Math.min(1,(t-t0)/1200); el.textContent = Math.round(end*(1-Math.pow(1-p,3))); if (p<1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  });
+  io.unobserve(e.target);
+}), { threshold:.15 });
+document.querySelectorAll(".rv").forEach(el => io.observe(el));
+window.addEventListener("error", () => document.querySelectorAll(".rv").forEach(e => e.classList.add("in")));
+
+// architecture nodes
+const nodes = [["Node 1","RPi · SOME/IP"],["Node 2","RPi · SOME/IP"],["Node 3","Arduino"],["Node 4","Arduino"],["Node 5","Arduino"]];
+const g = document.getElementById("nodes"), NS = "http://www.w3.org/2000/svg";
+nodes.forEach(([t,s],i) => {
+  const x = 320 + i*136, el = document.createElementNS(NS,"g");
+  const onLin = i >= 2, onEth = i < 2;
+  el.innerHTML =
+    `<line x1="${x+56}" y1="70" x2="${x+56}" y2="125" stroke="#5ef2c2" stroke-width="1.5"/>` +
+    (onLin ? `<line x1="${x+56}" y1="195" x2="${x+56}" y2="250" stroke="#ffb547" stroke-width="1.5"/>` : "") +
+    `<rect x="${x}" y="125" width="112" height="70" rx="10" class="node"/>` +
+    `<circle cx="${x+98}" cy="139" r="3.5" fill="#5ef2c2"><animate attributeName="opacity" values="1;.2;1" dur="${1.1+i*.23}s" repeatCount="indefinite"/></circle>` +
+    `<text x="${x+14}" y="155" class="node-t">${t}</text><text x="${x+14}" y="176" class="node-s">${s}</text>`;
+  g.appendChild(el);
+});
+
+// oscilloscope: differential CAN trace generated from a random bitstream
+const th = document.getElementById("th"), tlp = document.getElementById("tl");
+let bits = Array.from({length:60},()=>Math.random()>.5?1:0), off = 0;
+function draw(){
+  const w = 300/40; let dH = "", dL = "";
+  for (let i=0;i<41;i++){
+    const b = bits[(i+off)%bits.length], x = i*w - (performance.now()/40 % w);
+    const yH = b ? 8 : 18, yL = b ? 38 : 28;   // dominant: H up, L down
+    dH += (i?"L":"M")+x+" "+yH+" L"+(x+w)+" "+yH;
+    dL += (i?"L":"M")+x+" "+yL+" L"+(x+w)+" "+yL;
+  }
+  th.setAttribute("d",dH); tlp.setAttribute("d",dL);
+  requestAnimationFrame(draw);
+}
+if (!matchMedia("(prefers-reduced-motion: reduce)").matches) { draw(); setInterval(()=>{off++; if(Math.random()>.7) bits[(off+40)%60]^=1;},40); } else draw();
+
+// frame log
+const fr = document.getElementById("frames");
+const hex = n => n.toString(16).toUpperCase().padStart(2,"0");
+function frame(){
+  const id = "0x" + (0x100 + Math.floor(Math.random()*0x500)).toString(16).toUpperCase();
+  const data = Array.from({length:8},()=>hex(Math.random()*256|0)).join(" ");
+  const d = document.createElement("div");
+  d.innerHTML = `<span class="id">${id}</span>  [8]  ${data}  <span class="ok">CRC8 ✓</span>`;
+  fr.prepend(d); while (fr.children.length > 3) fr.lastChild.remove();
+}
+frame(); frame(); frame(); setInterval(frame, 1400);
+
+// optional identify toast — shown AFTER the download starts, never blocks it
+const toast = document.getElementById("toast");
+document.querySelectorAll(".js-cv").forEach(a => a.addEventListener("click", () => {
+  if (!window.OGTrack || OGTrack.known() || sessionStorage.getItem("og_toast")) return;
+  sessionStorage.setItem("og_toast","1");
+  setTimeout(() => toast.classList.add("show"), 700);
+}));
+const hide = () => toast.classList.remove("show");
+document.getElementById("toastX").onclick = hide;
+document.getElementById("toastSkip").onclick = () => { OGTrack.send("click","identify_skipped"); hide(); };
+document.getElementById("toastSend").onclick = () => {
+  const n = document.getElementById("tName").value, c = document.getElementById("tCo").value;
+  if (n.trim() || c.trim()) OGTrack.identify(n, c);
+  toast.querySelector("h5").textContent = "Thanks — talk soon.";
+  setTimeout(hide, 1200);
+};
+</script>
+</body>
+</html>

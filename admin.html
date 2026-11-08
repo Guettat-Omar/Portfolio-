@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Visitor Log — Omar</title>
+<link rel="icon" href="assets/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#0a0c0f;--bg2:#0f1216;--panel:#12161b;--line:#1f252d;--line2:#2a323c;--ink:#e9edf1;--mute:#8a96a3;--dim:#5b6672;--sig:#5ef2c2;--amb:#ffb547;--red:#ff6b6b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.5 "Inter Tight",system-ui,sans-serif;padding:28px 20px 60px}
+.wrap{max-width:1280px;margin:0 auto}
+.mono{font-family:"JetBrains Mono",monospace}
+h1{font-size:22px;font-weight:600;display:flex;align-items:center;gap:10px}
+h1 i{width:8px;height:8px;border-radius:50%;background:var(--sig);box-shadow:0 0 10px var(--sig)}
+.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:24px}
+button,.btn{background:var(--panel);color:var(--ink);border:1px solid var(--line2);border-radius:9px;padding:9px 14px;font:500 13px inherit;cursor:pointer}
+button.p{background:var(--sig);color:#04110c;border-color:var(--sig)}
+input,select{background:var(--bg);color:var(--ink);border:1px solid var(--line2);border-radius:9px;padding:9px 12px;font:14px inherit}
+input:focus{outline:none;border-color:var(--sig)}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:20px}
+#login{max-width:400px;margin:12vh auto;display:grid;gap:12px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:18px}
+.kpi b{display:block;font-size:30px;font-weight:600;line-height:1.1}
+.kpi span{color:var(--mute);font-size:12.5px}
+.row2{display:grid;grid-template-columns:1.4fr 1fr;gap:12px;margin-bottom:18px}
+@media(max-width:860px){.row2{grid-template-columns:1fr}}
+.lbl{font:500 11.5px "JetBrains Mono";color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font:500 11.5px "JetBrains Mono";color:var(--dim);text-transform:uppercase;letter-spacing:.06em;padding:10px 12px;border-bottom:1px solid var(--line)}
+td{padding:12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr.s{cursor:pointer} tr.s:hover td{background:var(--panel)}
+.who b{font-weight:600}.who small{display:block;color:var(--mute)}
+.tag{display:inline-block;font:11.5px "JetBrains Mono";padding:3px 8px;border-radius:6px;border:1px solid var(--line2);color:var(--mute);margin:0 4px 4px 0;white-space:nowrap}
+.tag.cv{color:var(--sig);border-color:rgba(94,242,194,.4)}
+.tag.li{color:#7cb7ff;border-color:rgba(124,183,255,.4)}
+.tag.mail{color:var(--amb);border-color:rgba(255,181,71,.4)}
+.tag.ret{color:var(--amb)}
+.tl td{background:var(--bg);font:12.5px "JetBrains Mono";color:var(--mute)}
+.tl div{padding:3px 0}.tl em{color:var(--dim);font-style:normal;display:inline-block;width:80px}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:6px;width:90px}.bar i{display:block;height:100%;background:var(--sig)}
+.gen{display:flex;gap:8px;flex-wrap:wrap}.gen input{flex:1;min-width:180px}
+#genOut{margin-top:10px;font:12.5px "JetBrains Mono";color:var(--sig);word-break:break-all}
+.funnel div{display:flex;align-items:center;gap:10px;margin:8px 0}.funnel span{width:130px;color:var(--mute);font-size:13px}.funnel i{height:18px;background:var(--sig);border-radius:4px;opacity:.85}.funnel b{font:500 12.5px "JetBrains Mono"}
+.empty{color:var(--dim);padding:30px;text-align:center}
+.tblwrap{overflow-x:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div id="login" class="card" hidden>
+  <h1><i></i>Visitor log</h1>
+  <p style="color:var(--mute)">Sign in with the owner email. You'll get a one-time link.</p>
+  <input id="em" type="email" placeholder="you@email.com">
+  <button class="p" id="go">Send magic link</button>
+  <p id="lmsg" style="color:var(--mute);font-size:13px"></p>
+</div>
+
+<div id="app" hidden>
+  <div class="top">
+    <h1><i></i>Visitor log</h1>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <select id="range"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option><option value="3650">All time</option></select>
+      <label style="display:flex;align-items:center;gap:6px;color:var(--mute)"><input type="checkbox" id="hideBounce"> hide &lt;5 s</label>
+      <button id="ign"></button>
+      <button id="refresh">Refresh</button>
+      <button id="csv">Export CSV</button>
+      <button id="out">Sign out</button>
+    </div>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="row2">
+    <div class="card">
+      <div class="lbl">Personal tracking link — send one per recruiter</div>
+      <div class="gen"><input id="gName" placeholder="e.g. Sarah — Valeo HR"><button class="p" id="gBtn">Create link</button></div>
+      <div id="genOut"></div>
+      <p style="color:var(--dim);font-size:12.5px;margin-top:10px">Whoever opens that link shows up here under that name — on every later visit from the same browser too.</p>
+    </div>
+    <div class="card">
+      <div class="lbl">Conversion funnel</div>
+      <div class="funnel" id="funnel"></div>
+    </div>
+  </div>
+
+  <div class="card tblwrap">
+    <div class="lbl">Sessions — click a row for the full timeline</div>
+    <table>
+      <thead><tr><th>When</th><th>Who</th><th>Actions</th><th>Time on site</th><th>Came from</th><th>Device · Zone</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<script>
+const C = window.SITE_CONFIG;
+const sb = supabase.createClient(C.supabaseUrl, C.supabaseAnonKey);
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let SESSIONS = [];
+
+// don't count my own visits
+const ignBtn = $("ign");
+const ignState = () => { try { return localStorage.getItem("og_ignore")==="1"; } catch(e){ return false; } };
+const paintIgn = () => ignBtn.textContent = ignState() ? "✓ My visits ignored" : "Ignore my visits";
+ignBtn.onclick = () => { try { localStorage.setItem("og_ignore", ignState() ? "0" : "1"); } catch(e){} paintIgn(); };
+paintIgn();
+
+async function boot(){
+  const { data:{ session } } = await sb.auth.getSession();
+  $("login").hidden = !!session; $("app").hidden = !session;
+  if (session) load();
+}
+$("go").onclick = async () => {
+  const { error } = await sb.auth.signInWithOtp({ email: $("em").value.trim(), options:{ emailRedirectTo: location.href.split("#")[0] } });
+  $("lmsg").textContent = error ? error.message : "Check your inbox.";
+};
+$("out").onclick = async () => { await sb.auth.signOut(); boot(); };
+$("refresh").onclick = load; $("range").onchange = load; $("hideBounce").onchange = render;
+sb.auth.onAuthStateChange(() => boot());
+
+async function load(){
+  const since = new Date(Date.now() - (+$("range").value)*864e5).toISOString();
+  let all = [], from = 0;
+  while (true) {
+    const { data, error } = await sb.from("events").select("*").gte("created_at", since)
+      .order("created_at", { ascending:true }).range(from, from+999);
+    if (error) { $("rows").innerHTML = `<tr><td colspan=6 class=empty>${esc(error.message)}</td></tr>`; return; }
+    all = all.concat(data); if (data.length < 1000) break; from += 1000;
+  }
+  build(all); render();
+}
+
+function device(ua=""){
+  const os = /iPhone|iPad/.test(ua)?"iOS":/Android/.test(ua)?"Android":/Mac OS/.test(ua)?"macOS":/Windows/.test(ua)?"Windows":/Linux/.test(ua)?"Linux":"?";
+  const br = /Edg\//.test(ua)?"Edge":/OPR\//.test(ua)?"Opera":/Chrome\//.test(ua)?"Chrome":/Firefox\//.test(ua)?"Firefox":/Safari\//.test(ua)?"Safari":"?";
+  const mob = /Mobi|Android|iPhone/.test(ua);
+  return `${mob?"📱":"💻"} ${os} · ${br}`;
+}
+function source(ref){
+  if (!ref) return "Direct / link";
+  try { const h = new URL(ref).hostname.replace(/^www\./,"");
+    if (/linkedin|lnkd/.test(h)) return "LinkedIn";
+    if (/google/.test(h)) return "Google";
+    if (/mail|outlook/.test(h)) return "Email client";
+    return h; } catch(e){ return ref; }
+}
+const fmtDur = s => s < 60 ? `${s}s` : `${Math.floor(s/60)}m ${String(s%60).padStart(2,"0")}s`;
+
+function build(ev){
+  const by = new Map(), firstSeen = new Map();
+  ev.forEach(e => {
+    if (!by.has(e.session_id)) by.set(e.session_id, []);
+    by.get(e.session_id).push(e);
+    if (!firstSeen.has(e.visitor_id)) firstSeen.set(e.visitor_id, e.created_at);
+  });
+  const visitsPerVisitor = {};
+  SESSIONS = [...by.values()].map(list => {
+    const f = list[0], last = list[list.length-1];
+    const named = list.slice().reverse().find(x => x.visitor_name || x.visitor_company) || {};
+    const clicks = list.filter(x => x.event_type === "click");
+    visitsPerVisitor[f.visitor_id] = (visitsPerVisitor[f.visitor_id]||0) + 1;
+    return {
+      id: f.session_id, visitor: f.visitor_id, start: f.created_at, end: last.created_at,
+      name: named.visitor_name, company: named.visitor_company, ref: list.find(x=>x.ref_tag)?.ref_tag,
+      dur: Math.max(...list.map(x => x.duration_s||0)),
+      scroll: Math.max(...list.map(x => x.scroll_pct||0)),
+      clicks, sections: list.filter(x=>x.event_type==="section").map(x=>x.label),
+      src: source(f.referrer), dev: device(f.user_agent), tz: f.timezone, lang: f.language, events: list
+    };
+  }).sort((a,b) => b.start.localeCompare(a.start));
+  SESSIONS.forEach(s => s.returning = visitsPerVisitor[s.visitor] > 1);
+}
+
+function tagFor(label){
+  if (/^cv/.test(label)) return ["cv","⬇ CV"];
+  if (/^linkedin/.test(label)) return ["li","in LinkedIn"];
+  if (/^email/.test(label)) return ["mail","✉ Email"];
+  if (/^github/.test(label)) return ["","GitHub"];
+  return ["",label];
+}
+
+function render(){
+  const list = SESSIONS.filter(s => !$("hideBounce").checked || s.dur >= 5);
+  const has = (s,p) => s.clicks.some(c => p.test(c.label||""));
+  const cv = list.filter(s=>has(s,/^cv/)).length, li = list.filter(s=>has(s,/^linkedin/)).length,
+        em = list.filter(s=>has(s,/^email/)).length, known = list.filter(s=>s.name||s.ref).length;
+  const avg = list.length ? Math.round(list.reduce((a,s)=>a+s.dur,0)/list.length) : 0;
+  const uniq = new Set(list.map(s=>s.visitor)).size;
+  $("kpis").innerHTML = [
+    [list.length,"Visits"],[uniq,"Unique visitors"],[known,"Identified visits"],
+    [cv,"Visits with CV download"],[li,"Visits → LinkedIn"],[em,"Visits → Email"],[fmtDur(avg),"Avg. active time"]
+  ].map(([v,l])=>`<div class="card kpi"><b>${v}</b><span>${l}</span></div>`).join("");
+
+  const read = list.filter(s=>s.dur>=30).length, max = Math.max(1,list.length);
+  $("funnel").innerHTML = [["Opened",list.length],["Stayed 30 s+",read],["Saw flagship",list.filter(s=>s.sections.includes("work")).length],["Downloaded CV",cv],["Contacted",em]]
+    .map(([l,n])=>`<div><span>${l}</span><i style="width:${Math.max(2,n/max*200)}px"></i><b>${n}</b></div>`).join("");
+
+  if (!list.length) { $("rows").innerHTML = `<tr><td colspan=6 class=empty>No visits yet in this range.</td></tr>`; return; }
+  $("rows").innerHTML = list.map(s => {
+    const d = new Date(s.start);
+    const who = s.name || s.ref
+      ? `<b>${esc(s.name || s.ref)}</b>${s.company?`<small>${esc(s.company)}</small>`:""}${s.name && s.ref?`<small>via link “${esc(s.ref)}”</small>`:""}`
+      : `<b style="color:var(--mute)">Anonymous</b><small class="mono">#${esc(s.visitor.slice(0,6))}</small>`;
+    const acts = [...new Set(s.clicks.map(c=>c.label))].map(l => { const [c,t]=tagFor(l); return `<span class="tag ${c}">${esc(t)}</span>`; }).join("") || `<span style="color:var(--dim)">—</span>`;
+    return `<tr class="s" data-id="${s.id}">
+      <td class="mono">${d.toLocaleDateString(undefined,{day:"2-digit",month:"short"})}<br><span style="color:var(--mute)">${d.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}</span></td>
+      <td class="who">${who}${s.returning?`<span class="tag ret">returning</span>`:""}</td>
+      <td>${acts}</td>
+      <td class="mono">${fmtDur(s.dur)}<div class="bar" title="scroll ${s.scroll}%"><i style="width:${s.scroll}%"></i></div></td>
+      <td>${esc(s.src)}</td>
+      <td>${s.dev}<br><span style="color:var(--dim);font-size:12.5px">${esc(s.tz||"")} · ${esc(s.lang||"")}</span></td>
+    </tr>`;
+  }).join("");
+  document.querySelectorAll("tr.s").forEach(tr => tr.onclick = () => {
+    const nx = tr.nextElementSibling;
+    if (nx && nx.classList.contains("tl")) return nx.remove();
+    const s = SESSIONS.find(x=>x.id===tr.dataset.id), t0 = new Date(s.start);
+    const lines = s.events.filter(e=>e.event_type!=="ping").map(e => {
+      const dt = Math.round((new Date(e.created_at)-t0)/1000);
+      const what = e.event_type==="click" ? `clicked ${e.label}` : e.event_type==="section" ? `read section “${e.label}”` :
+                   e.event_type==="identify" ? `identified as ${e.visitor_name||""} ${e.visitor_company?"("+e.visitor_company+")":""}` :
+                   e.event_type==="leave" ? `left / switched tab (active ${fmtDur(e.duration_s)})` : "arrived";
+      return `<div><em>+${fmtDur(dt)}</em>${esc(what)}</div>`;
+    }).join("");
+    tr.insertAdjacentHTML("afterend", `<tr class="tl"><td colspan=6>${lines}</td></tr>`);
+  });
+}
+
+$("gBtn").onclick = () => {
+  const raw = $("gName").value.trim(); if (!raw) return;
+  const slug = raw.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+  const url = location.origin + location.pathname.replace(/admin\.html$/,"") + "?r=" + slug;
+  $("genOut").textContent = url;
+  navigator.clipboard?.writeText(url).then(()=> $("genOut").textContent = url + "  ✓ copied");
+};
+
+$("csv").onclick = () => {
+  const head = ["start","name","company","ref","visitor","duration_s","scroll_pct","actions","source","device","timezone"];
+  const rows = SESSIONS.map(s => [s.start,s.name,s.company,s.ref,s.visitor,s.dur,s.scroll,[...new Set(s.clicks.map(c=>c.label))].join("|"),s.src,s.dev,s.tz]);
+  const csv = [head,...rows].map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv],{type:"text/csv"})); a.download = "visitors.csv"; a.click();
+};
+
+if (C.supabaseUrl.includes("YOUR-PROJECT")) {
+  document.body.innerHTML = `<div class="card" style="max-width:520px;margin:15vh auto"><h1><i></i>Not configured</h1><p style="color:var(--mute);margin-top:10px">Fill in supabaseUrl and supabaseAnonKey in config.js — see README.md.</p></div>`;
+} else boot();
+</script>
+</body>
+</html>
